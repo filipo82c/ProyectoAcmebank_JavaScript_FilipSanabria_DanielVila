@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banco Acme — Dashboard</title>
+  <link rel="stylesheet" href="../CSS/styles.css" />
+  <link rel="icon" href="/IMG/5531960.png" />
+</head>
+<body>
+
+<!-- Header con Web Component (se auto-rellena con datos de sesión) -->
+<acme-header></acme-header>
+
+<div class="dashboard-layout">
+
+  <!-- ══════════════════════════════════════════════
+       SIDEBAR — menú de navegación lateral
+  ═══════════════════════════════════════════════ -->
+  <nav class="sidebar" role="navigation" aria-label="Menú principal">
+    <button class="sidebar__item sidebar__item--activo" data-seccion="resumen">
+      <span class="sidebar__icono">🏠</span>
+      <span class="sidebar__texto">Inicio</span>
+    </button>
+
+    <div class="sidebar__separador"></div>
+
+    <button class="sidebar__item" data-seccion="transacciones">
+      <span class="sidebar__icono">📋</span>
+      <span class="sidebar__texto">Transacciones</span>
+    </button>
+    <button class="sidebar__item" data-seccion="consignacion">
+      <span class="sidebar__icono">💰</span>
+      <span class="sidebar__texto">Consignación</span>
+    </button>
+    <button class="sidebar__item" data-seccion="transferencia">
+      <span class="sidebar__icono">💸</span>
+      <span class="sidebar__texto">Transferencia</span>
+    </button>
+    <button class="sidebar__item" data-seccion="retiro">
+      <span class="sidebar__icono">🏧</span>
+      <span class="sidebar__texto">Retiro</span>
+    </button>
+    <button class="sidebar__item" data-seccion="servicios">
+      <span class="sidebar__icono">🔌</span>
+      <span class="sidebar__texto">Servicios</span>
+    </button>
+    <button class="sidebar__item" data-seccion="certificado">
+      <span class="sidebar__icono">📜</span>
+      <span class="sidebar__texto">Certificado</span>
+    </button>
+
+    <div class="sidebar__separador"></div>
+
+    <button class="sidebar__item sidebar__item--peligro" id="btnCerrarSesion">
+      <span class="sidebar__icono">🚪</span>
+      <span class="sidebar__texto">Cerrar sesión</span>
+    </button>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════
+       ÁREA PRINCIPAL — contenido dinámico
+  ═══════════════════════════════════════════════ -->
+  <main class="dashboard-main">
+
+    <!-- ── Sección: Inicio / Resumen de cuenta ── -->
+    <section id="seccion-resumen" class="seccion seccion--activa">
+      <h2>Mi cuenta</h2>
+      <p class="text-muted mt-sm">Bienvenido al panel de gestión de tu cuenta bancaria.</p>
+
+      <!-- Tarjetas resumen -->
+      <div class="resumen-grid mt-lg">
+        <div class="card card--primario">
+          <div class="card__titulo">Número de cuenta</div>
+          <div class="card__valor" id="resNumeroCuenta" style="font-size:1.2rem; letter-spacing:.05em;">—</div>
+        </div>
+        <div class="card card--primario">
+          <div class="card__titulo">Saldo disponible</div>
+          <div class="card__valor" id="resSaldo">—</div>
+        </div>
+        <div class="card" style="border: 2px solid var(--color-borde);">
+          <div class="card__titulo" style="color: var(--color-texto-suave);">Fecha de creación</div>
+          <div class="card__valor" style="color: var(--color-primario); font-size:1.3rem;" id="resFechaCreacion">—</div>
+        </div>
+      </div>
+
+      <!-- Datos del titular -->
+      <div class="card mt-lg">
+        <h3>Datos del titular</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top:1rem;">
+          <div>
+            <div class="text-muted" style="font-size:.8rem; text-transform:uppercase; letter-spacing:.05em;">Nombre completo</div>
+            <div id="resTitular" style="font-weight:700; margin-top:.25rem;">—</div>
+          </div>
+          <div>
+            <div class="text-muted" style="font-size:.8rem; text-transform:uppercase; letter-spacing:.05em;">Identificación</div>
+            <div id="resIdentificacion" style="font-weight:700; margin-top:.25rem;">—</div>
+          </div>
+          <div>
+            <div class="text-muted" style="font-size:.8rem; text-transform:uppercase; letter-spacing:.05em;">Correo</div>
+            <div id="resCorreo" style="font-weight:700; margin-top:.25rem;">—</div>
+          </div>
+          <div>
+            <div class="text-muted" style="font-size:.8rem; text-transform:uppercase; letter-spacing:.05em;">Teléfono</div>
+            <div id="resTelefono" style="font-weight:700; margin-top:.25rem;">—</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Sección: Resumen de transacciones ── -->
+    <section id="seccion-transacciones" class="seccion">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+        <div>
+          <h2>Resumen de transacciones</h2>
+          <p class="text-muted mt-sm">Últimas 10 transacciones de tu cuenta.</p>
+        </div>
+        <button class="btn btn--outline no-print" onclick="imprimirElemento('tablaTransacciones', 'Transacciones — Banco Acme')">
+          🖨️ Imprimir
+        </button>
+      </div>
+
+      <div class="card tabla-container" id="tablaTransacciones">
+        <table class="tabla" id="tblTransacciones">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Referencia</th>
+              <th>Tipo</th>
+              <th>Concepto</th>
+              <th>Valor</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoTablaTransacciones">
+            <!-- Se llena con JS -->
+          </tbody>
+        </table>
+        <div id="sinTransacciones" class="hidden" style="text-align:center; padding:2rem; color: var(--color-texto-suave);">
+          <div style="font-size:3rem; margin-bottom:1rem;">📭</div>
+          <p>Aún no tienes transacciones registradas.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Sección: Consignación electrónica ── -->
+    <section id="seccion-consignacion" class="seccion">
+      <h2>Consignación electrónica</h2>
+      <p class="text-muted mt-sm">Deposita dinero en tu cuenta de forma rápida.</p>
+
+      <div class="card mt-lg" style="max-width:540px;">
+        <!-- Info del usuario (solo lectura) -->
+        <div style="background: var(--color-fondo); border-radius: var(--radio-md); padding:1rem; margin-bottom:1.5rem;">
+          <div style="font-size:.8rem; color: var(--color-texto-suave); text-transform:uppercase; letter-spacing:.05em;">Cuenta destino</div>
+          <div id="consNumeroCuenta" style="font-size:1.1rem; font-weight:700; color: var(--color-primario); margin-top:.25rem;">—</div>
+          <div id="consNombreUsuario" style="color: var(--color-texto-suave); font-size:.9rem; margin-top:.1rem;">—</div>
+        </div>
+
+        <acme-alert id="alertaConsignacion"></acme-alert>
+
+        <form id="formConsignacion" novalidate>
+          <div class="form-grupo">
+            <label for="montoConsignacion">Monto a consignar (COP)</label>
+            <input type="number" id="montoConsignacion" class="form-input"
+              placeholder="Ej: 500000" min="1000" step="1000" required />
+            <acme-campo-error id="errMontoConsignacion"></acme-campo-error>
+          </div>
+          <button type="submit" class="btn btn--primario btn--lg btn--full">
+            💰 Realizar consignación
+          </button>
+        </form>
+      </div>
+
+      <!-- Recibo de consignación (oculto hasta que se realice) -->
+      <div id="reciboConsignacion" class="hidden mt-lg">
+        <h3>Comprobante de transacción</h3>
+        <div id="contenidoReciboConsignacion" class="recibo mt-md"></div>
+        <div style="display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap;">
+          <button class="btn btn--outline no-print" onclick="imprimirElemento('contenidoReciboConsignacion', 'Comprobante Consignación')">
+            🖨️ Imprimir comprobante
+          </button>
+          <button class="btn btn--ghost no-print" onclick="nuevaOperacion('consignacion')">
+            ✚ Nueva consignación
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Sección: Transferencia entre cuentas ── -->
+    <section id="seccion-transferencia" class="seccion">
+      <h2>Transferencia a otras cuentas</h2>
+      <p class="text-muted mt-sm">Transfiere dinero a otras cuentas registradas en el sistema.</p>
+
+      <div class="card mt-lg" style="max-width:540px;">
+        <div style="background: var(--color-fondo); border-radius: var(--radio-md); padding:1rem; margin-bottom:1.5rem;">
+          <div style="font-size:.8rem; color: var(--color-texto-suave); text-transform:uppercase; letter-spacing:.05em;">Cuenta origen</div>
+          <div id="transNumeroCuenta" style="font-size:1.1rem; font-weight:700; color: var(--color-primario); margin-top:.25rem;">—</div>
+          <div id="transNombreUsuario" style="color: var(--color-texto-suave); font-size:.9rem; margin-top:.1rem;">—</div>
+          <div style="margin-top:.5rem; font-size:.85rem;">
+            Saldo disponible: <strong id="transSaldoDisponible" style="color: var(--color-exito);">—</strong>
+          </div>
+        </div>
+
+        <acme-alert id="alertaTransferencia"></acme-alert>
+
+        <form id="formTransferencia" novalidate>
+          <div class="form-grupo">
+            <label for="cuentaDestino">Número de cuenta destino</label>
+            <select id="cuentaDestino" class="form-input" required>
+              <option value="">Selecciona una cuenta...</option>
+              <!-- Se llena con JS -->
+            </select>
+            <acme-campo-error id="errCuentaDestino"></acme-campo-error>
+          </div>
+          
+          <!-- Info del destinatario -->
+          <div id="infoDestinatario" class="hidden" style="background: var(--color-fondo); border-radius: var(--radio-md); padding:1rem; margin-bottom:1rem;">
+            <div style="font-size:.8rem; color: var(--color-texto-suave); text-transform:uppercase; letter-spacing:.05em;">Transferir a</div>
+            <div id="nombreDestinatario" style="font-weight:700; color: var(--color-primario); margin-top:.25rem;">—</div>
+            <div id="idDestinatario" style="color: var(--color-texto-suave); font-size:.85rem;">—</div>
+          </div>
+
+          <div class="form-grupo">
+            <label for="montoTransferencia">Monto a transferir (COP)</label>
+            <input type="number" id="montoTransferencia" class="form-input"
+              placeholder="Ej: 100000" min="1000" step="1000" required />
+            <acme-campo-error id="errMontoTransferencia"></acme-campo-error>
+          </div>
+          <button type="submit" class="btn btn--primario btn--lg btn--full">
+            💸 Realizar transferencia
+          </button>
+        </form>
+      </div>
+
+      <div id="reciboTransferencia" class="hidden mt-lg">
+        <h3>Comprobante de transferencia</h3>
+        <div id="contenidoReciboTransferencia" class="recibo mt-md"></div>
+        <div style="display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap;">
+          <button class="btn btn--outline no-print" onclick="imprimirElemento('contenidoReciboTransferencia', 'Comprobante Transferencia')">
+            🖨️ Imprimir comprobante
+          </button>
+          <button class="btn btn--ghost no-print" onclick="nuevaOperacion('transferencia')">
+            ✚ Nueva transferencia
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Sección: Retiro de dinero ── -->
+    <section id="seccion-retiro" class="seccion">
+      <h2>Retiro de dinero</h2>
+      <p class="text-muted mt-sm">Retira dinero de tu cuenta.</p>
+
+      <div class="card mt-lg" style="max-width:540px;">
+        <div style="background: var(--color-fondo); border-radius: var(--radio-md); padding:1rem; margin-bottom:1.5rem;">
+          <div style="font-size:.8rem; color: var(--color-texto-suave); text-transform:uppercase; letter-spacing:.05em;">Cuenta origen</div>
+          <div id="retNumeroCuenta" style="font-size:1.1rem; font-weight:700; color: var(--color-primario); margin-top:.25rem;">—</div>
+          <div id="retNombreUsuario" style="color: var(--color-texto-suave); font-size:.9rem; margin-top:.1rem;">—</div>
+          <div style="margin-top:.5rem; font-size:.85rem;">
+            Saldo disponible: <strong id="retSaldoDisponible" style="color: var(--color-exito);">—</strong>
+          </div>
+        </div>
+
+        <acme-alert id="alertaRetiro"></acme-alert>
+
+        <form id="formRetiro" novalidate>
+          <div class="form-grupo">
+            <label for="montoRetiro">Monto a retirar (COP)</label>
+            <input type="number" id="montoRetiro" class="form-input"
+              placeholder="Ej: 200000" min="1000" step="1000" required />
+            <acme-campo-error id="errMontoRetiro"></acme-campo-error>
+          </div>
+          <button type="submit" class="btn btn--primario btn--lg btn--full">
+            💸 Realizar retiro
+          </button>
+        </form>
+      </div>
+
+      <div id="reciboRetiro" class="hidden mt-lg">
+        <h3>Comprobante de transacción</h3>
+        <div id="contenidoReciboRetiro" class="recibo mt-md"></div>
+        <div style="display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap;">
+          <button class="btn btn--outline no-print" onclick="imprimirElemento('contenidoReciboRetiro', 'Comprobante Retiro')">
+            🖨️ Imprimir comprobante
+          </button>
+          <button class="btn btn--ghost no-print" onclick="nuevaOperacion('retiro')">
+            ✚ Nuevo retiro
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Sección: Pago de servicios ── -->
+    <section id="seccion-servicios" class="seccion">
+      <h2>Pago de servicios públicos</h2>
+      <p class="text-muted mt-sm">Paga tus servicios de forma rápida y segura.</p>
+
+      <div class="card mt-lg" style="max-width:540px;">
+        <div style="background: var(--color-fondo); border-radius: var(--radio-md); padding:1rem; margin-bottom:1.5rem;">
+          <div style="font-size:.8rem; color: var(--color-texto-suave); text-transform:uppercase; letter-spacing:.05em;">Cuenta origen</div>
+          <div id="servNumeroCuenta" style="font-size:1.1rem; font-weight:700; color: var(--color-primario); margin-top:.25rem;">—</div>
+          <div id="servNombreUsuario" style="color: var(--color-texto-suave); font-size:.9rem; margin-top:.1rem;">—</div>
+          <div style="margin-top:.5rem; font-size:.85rem;">
+            Saldo disponible: <strong id="servSaldoDisponible" style="color: var(--color-exito);">—</strong>
+          </div>
+        </div>
+
+        <acme-alert id="alertaServicios"></acme-alert>
+
+        <form id="formServicios" novalidate>
+          <div class="form-grupo">
+            <label for="tipoServicio">Servicio a pagar</label>
+            <select id="tipoServicio" class="form-input" required>
+              <option value="">Selecciona el servicio...</option>
+              <option value="Energía">⚡ Energía</option>
+              <option value="Agua">💧 Agua</option>
+              <option value="Gas natural">🔥 Gas natural</option>
+              <option value="Internet">🌐 Internet</option>
+            </select>
+            <acme-campo-error id="errTipoServicio"></acme-campo-error>
+          </div>
+          <div class="form-grupo">
+            <label for="referenciaServicio">Número de referencia del servicio</label>
+            <input type="text" id="referenciaServicio" class="form-input"
+              placeholder="Ej: 9876543210" maxlength="20" required />
+            <acme-campo-error id="errReferenciaServicio"></acme-campo-error>
+          </div>
+          <div class="form-grupo">
+            <label for="montoServicio">Valor a pagar (COP)</label>
+            <input type="number" id="montoServicio" class="form-input"
+              placeholder="Ej: 150000" min="1000" step="1000" required />
+            <acme-campo-error id="errMontoServicio"></acme-campo-error>
+          </div>
+          <button type="submit" class="btn btn--primario btn--lg btn--full">
+            🔌 Realizar pago
+          </button>
+        </form>
+      </div>
+
+      <div id="reciboServicios" class="hidden mt-lg">
+        <h3>Comprobante de pago</h3>
+        <div id="contenidoReciboServicios" class="recibo mt-md"></div>
+        <div style="display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap;">
+          <button class="btn btn--outline no-print" onclick="imprimirElemento('contenidoReciboServicios', 'Comprobante Pago Servicio')">
+            🖨️ Imprimir comprobante
+          </button>
+          <button class="btn btn--ghost no-print" onclick="nuevaOperacion('servicios')">
+            ✚ Nuevo pago
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Sección: Certificado bancario ── -->
+    <section id="seccion-certificado" class="seccion">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
+        <div>
+          <h2>Certificado bancario</h2>
+          <p class="text-muted mt-sm">Certificado oficial de cuenta activa.</p>
+        </div>
+        <button class="btn btn--acento no-print" onclick="imprimirElemento('certificadoBancario', 'Certificado Bancario — Banco Acme')">
+          🖨️ Imprimir certificado
+        </button>
+      </div>
+
+      <!-- El certificado se genera dinámicamente -->
+      <div id="certificadoBancario" class="certificado">
+        <!-- Contenido insertado por JS -->
+      </div>
+    </section>
+
+  </main><!-- .dashboard-main -->
+</div><!-- .dashboard-layout -->
+
+<script src="../JS/storage.js"></script>
+<script src="../JS/utils.js"></script>
+<script src="../JS/components.js"></script>
+
+<script>
+  // ══════════════════════════════════════════════════════════
+  //  INICIALIZACIÓN
+  //  protegerPagina() verifica la sesión; si no hay sesión
+  //  redirige al login y el código no sigue ejecutándose.
+  // ══════════════════════════════════════════════════════════
+  const usuario = protegerPagina();
+
+  // Cargar datos del usuario en todas las secciones
+  cargarDatosUsuario();
+
+  // ══════════════════════════════════════════════════════════
+  //  NAVEGACIÓN DEL SIDEBAR
+  // ══════════════════════════════════════════════════════════
+
+  // querySelectorAll devuelve TODOS los elementos que coinciden con el selector
+  // (a diferencia de querySelector que devuelve solo el primero)
+  const itemsMenu = document.querySelectorAll(".sidebar__item[data-seccion]");
+
+  itemsMenu.forEach(function (item) {
+    // Para cada botón del menú, escuchamos el click
+    item.addEventListener("click", function () {
+      const nombreSeccion = this.dataset.seccion;
+      // this.dataset.seccion lee el atributo data-seccion del elemento
+
+      // Quitar clase activa de todos los items
+      itemsMenu.forEach(i => i.classList.remove("sidebar__item--activo"));
+      // Agregar clase activa al clickeado
+      this.classList.add("sidebar__item--activo");
+
+      // Ocultar todas las secciones
+      document.querySelectorAll(".seccion").forEach(s => s.classList.remove("seccion--activa"));
+      // Mostrar la sección seleccionada
+      document.getElementById(`seccion-${nombreSeccion}`).classList.add("seccion--activa");
+
+      // Acciones específicas al entrar a ciertas secciones
+      if (nombreSeccion === "transacciones") cargarTablaTransacciones();
+      if (nombreSeccion === "certificado") generarCertificado();
+      if (nombreSeccion === "transferencia") cargarCuentasDisponibles();
+    });
+  });
+
+  // Botón de cerrar sesión
+  document.getElementById("btnCerrarSesion").addEventListener("click", function () {
+    if (confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+      cerrarSesionYRedirigir();
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════
+  //  CARGAR DATOS DEL USUARIO EN EL DOM
+  // ══════════════════════════════════════════════════════════
+  function cargarDatosUsuario() {
+    // Obtenemos datos FRESCOS desde localStorage (por si el saldo cambió)
+    const u = obtenerSesionActiva();
+    if (!u) return;
+
+    const nombreCompleto = `${u.nombres} ${u.apellidos}`;
+
+    // Sección resumen
+    document.getElementById("resNumeroCuenta").textContent   = u.numeroCuenta;
+    document.getElementById("resSaldo").textContent          = formatearMoneda(u.saldo);
+    document.getElementById("resFechaCreacion").textContent  = formatearFecha(u.fechaCreacion);
+    document.getElementById("resTitular").textContent        = nombreCompleto;
+    document.getElementById("resIdentificacion").textContent = `${u.tipoId} ${u.numeroId}`;
+    document.getElementById("resCorreo").textContent         = u.correo;
+    document.getElementById("resTelefono").textContent       = u.telefono;
+
+    // Consignación
+    document.getElementById("consNumeroCuenta").textContent = u.numeroCuenta;
+    document.getElementById("consNombreUsuario").textContent = nombreCompleto;
+
+    // Retiro
+    document.getElementById("retNumeroCuenta").textContent  = u.numeroCuenta;
+    document.getElementById("retNombreUsuario").textContent = nombreCompleto;
+    document.getElementById("retSaldoDisponible").textContent = formatearMoneda(u.saldo);
+
+    // Servicios
+    document.getElementById("servNumeroCuenta").textContent  = u.numeroCuenta;
+    document.getElementById("servNombreUsuario").textContent = nombreCompleto;
+    document.getElementById("servSaldoDisponible").textContent = formatearMoneda(u.saldo);
+
+    // Transferencia
+    document.getElementById("transNumeroCuenta").textContent  = u.numeroCuenta;
+    document.getElementById("transNombreUsuario").textContent = nombreCompleto;
+    document.getElementById("transSaldoDisponible").textContent = formatearMoneda(u.saldo);
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  TABLA DE TRANSACCIONES
+  // ══════════════════════════════════════════════════════════
+  function cargarTablaTransacciones() {
+    const u = obtenerSesionActiva();
+    const transacciones = obtenerTransaccionesPorCuenta(u.numeroCuenta);
+
+    const cuerpo = document.getElementById("cuerpoTablaTransacciones");
+    const sinTx  = document.getElementById("sinTransacciones");
+    const tabla  = document.getElementById("tblTransacciones");
+
+    // Mostrar las últimas 10 (slice(-10) toma los últimos 10 elementos)
+    // .reverse() invierte el array para mostrar el más reciente primero
+    const ultimas10 = transacciones.slice(-10).reverse();
+
+    if (ultimas10.length === 0) {
+      tabla.classList.add("hidden");
+      sinTx.classList.remove("hidden");
+      return;
+    }
+
+    tabla.classList.remove("hidden");
+    sinTx.classList.add("hidden");
+
+    // Construimos las filas de la tabla con template literals
+    cuerpo.innerHTML = ultimas10.map(function (tx) {
+      // Determinamos el badge según el tipo
+      let badgeClass = "badge--consignacion";
+      if (tx.tipo === "Retiro") badgeClass = "badge--retiro";
+      if (tx.tipo === "Pago de servicio") badgeClass = "badge--pago";
+      if (tx.tipo === "Transferencia enviada") badgeClass = "badge--retiro";
+      if (tx.tipo === "Transferencia recibida") badgeClass = "badge--consignacion";
+
+      return `
+        <tr>
+          <td>${formatearFecha(tx.fecha)}</td>
+          <td><code style="font-size:.8rem; color: var(--color-texto-suave);">${tx.referencia}</code></td>
+          <td><span class="badge ${badgeClass}">${tx.tipo}</span></td>
+          <td>${tx.concepto}</td>
+          <td style="font-weight:700; color: ${tx.tipo === 'Consignación' ? 'var(--color-exito)' : 'var(--color-error)'}">
+            ${tx.tipo === 'Consignación' ? '+' : '-'}${formatearMoneda(tx.valor)}
+          </td>
+        </tr>
+      `;
+    }).join(""); // .join("") une el array de strings en un solo string
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  CONSIGNACIÓN
+  // ══════════════════════════════════════════════════════════
+  document.getElementById("formConsignacion").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const monto = parseFloat(document.getElementById("montoConsignacion").value);
+    const errMonto = document.getElementById("errMontoConsignacion");
+    const alerta = document.getElementById("alertaConsignacion");
+
+    errMonto.ocultar();
+
+    // parseFloat convierte string a número decimal
+    if (!monto || monto < 1000) {
+      errMonto.mostrar("El monto mínimo es $1.000");
+      return;
+    }
+
+    const u = obtenerSesionActiva();
+
+    // Registrar la transacción (storage.js se encarga de actualizar el saldo)
+    const tx = registrarTransaccion({
+      numeroCuenta: u.numeroCuenta,
+      tipo: "Consignación",
+      concepto: "Consignación por canal electrónico",
+      valor: monto,
+    });
+
+    // Mostrar recibo
+    document.getElementById("contenidoReciboConsignacion").innerHTML = generarHTMLRecibo(tx, u);
+    document.getElementById("reciboConsignacion").classList.remove("hidden");
+    document.getElementById("formConsignacion").classList.add("hidden");
+
+    // Actualizar saldo en pantalla
+    cargarDatosUsuario();
+    alerta.mostrar("¡Consignación realizada exitosamente!", "success");
+  });
+
+  // ══════════════════════════════════════════════════════════
+  //  TRANSFERENCIA ENTRE CUENTAS
+  // ══════════════════════════════════════════════════════════
+  function cargarCuentasDisponibles() {
+    const u = obtenerSesionActiva();
+    const usuarios = obtenerUsuarios();
+    const select = document.getElementById("cuentaDestino");
+    
+    // Filtrar usuarios (excluir cuenta propia)
+    const otrasCuentas = usuarios.filter(usr => usr.numeroCuenta !== u.numeroCuenta);
+    
+    // Limpiar y llenar el select
+    select.innerHTML = '<option value="">Selecciona una cuenta...</option>';
+    otrasCuentas.forEach(usr => {
+      const option = document.createElement("option");
+      option.value = usr.numeroCuenta;
+      option.textContent = `${usr.numeroCuenta} - ${usr.nombres} ${usr.apellidos}`;
+      option.dataset.nombre = `${usr.nombres} ${usr.apellidos}`;
+      option.dataset.id = `${usr.tipoId} ${usr.numeroId}`;
+      select.appendChild(option);
+    });
+  }
+
+  // Mostrar información del destinatario al seleccionar cuenta
+  document.getElementById("cuentaDestino").addEventListener("change", function() {
+    const infoDiv = document.getElementById("infoDestinatario");
+    const selectedOption = this.options[this.selectedIndex];
+    
+    if (this.value) {
+      document.getElementById("nombreDestinatario").textContent = selectedOption.dataset.nombre;
+      document.getElementById("idDestinatario").textContent = selectedOption.dataset.id;
+      infoDiv.classList.remove("hidden");
+    } else {
+      infoDiv.classList.add("hidden");
+    }
+  });
+
+  document.getElementById("formTransferencia").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const cuentaDestino = document.getElementById("cuentaDestino").value;
+    const monto = parseFloat(document.getElementById("montoTransferencia").value);
+    const errCuenta = document.getElementById("errCuentaDestino");
+    const errMonto = document.getElementById("errMontoTransferencia");
+    const alerta = document.getElementById("alertaTransferencia");
+
+    // Limpiar errores
+    errCuenta.ocultar();
+    errMonto.ocultar();
+
+    let esValido = true;
+
+    if (!cuentaDestino) {
+      errCuenta.mostrar("Selecciona la cuenta destino");
+      esValido = false;
+    }
+
+    if (!monto || monto < 1000) {
+      errMonto.mostrar("El monto mínimo es $1.000");
+      esValido = false;
+    }
+
+    if (!esValido) return;
+
+    const u = obtenerSesionActiva();
+
+    // Verificar saldo suficiente
+    if (monto > u.saldo) {
+      errMonto.mostrar(`Saldo insuficiente. Disponible: ${formatearMoneda(u.saldo)}`);
+      alerta.mostrar("No tienes saldo suficiente para esta transferencia.", "error");
+      return;
+    }
+
+    // Realizar transferencia
+    const resultado = realizarTransferencia(u.numeroCuenta, cuentaDestino, monto);
+    
+    if (!resultado) {
+      alerta.mostrar("Error al realizar la transferencia. Verifica los datos.", "error");
+      return;
+    }
+
+    // Mostrar recibo
+    const destinatario = resultado.usuarioDestino;
+    document.getElementById("contenidoReciboTransferencia").innerHTML = `
+      <div class="recibo__titulo">
+        <strong>🏦 Banco Acme — Comprobante de Transferencia</strong>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Fecha</span>
+        <span class="recibo__valor">${formatearFecha(resultado.txOrigen.fecha)} ${resultado.txOrigen.hora}</span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Referencia</span>
+        <span class="recibo__valor" style="font-family:monospace;">${resultado.txOrigen.referencia}</span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Tipo</span>
+        <span class="recibo__valor">Transferencia</span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Cuenta origen</span>
+        <span class="recibo__valor">${u.numeroCuenta}</span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Cuenta destino</span>
+        <span class="recibo__valor">${cuentaDestino}</span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Beneficiario</span>
+        <span class="recibo__valor">${destinatario.nombres} ${destinatario.apellidos}</span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Valor</span>
+        <span class="recibo__valor" style="font-size:1.15rem; color: var(--color-primario);">
+          ${formatearMoneda(monto)}
+        </span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Saldo actual</span>
+        <span class="recibo__valor" style="color: var(--color-exito);">${formatearMoneda(obtenerSesionActiva().saldo)}</span>
+      </div>
+    `;
+
+    document.getElementById("reciboTransferencia").classList.remove("hidden");
+    document.getElementById("formTransferencia").classList.add("hidden");
+
+    cargarDatosUsuario();
+    alerta.mostrar("¡Transferencia realizada exitosamente!", "success");
+  });
+
+  // ══════════════════════════════════════════════════════════
+  //  RETIRO
+  // ══════════════════════════════════════════════════════════
+  document.getElementById("formRetiro").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const monto = parseFloat(document.getElementById("montoRetiro").value);
+    const errMonto = document.getElementById("errMontoRetiro");
+    const alerta = document.getElementById("alertaRetiro");
+
+    errMonto.ocultar();
+
+    const u = obtenerSesionActiva();
+
+    if (!monto || monto < 1000) {
+      errMonto.mostrar("El monto mínimo es $1.000");
+      return;
+    }
+
+    // Verificar que hay saldo suficiente
+    if (monto > u.saldo) {
+      errMonto.mostrar(`Saldo insuficiente. Disponible: ${formatearMoneda(u.saldo)}`);
+      alerta.mostrar("No tienes saldo suficiente para este retiro.", "error");
+      return;
+    }
+
+    const tx = registrarTransaccion({
+      numeroCuenta: u.numeroCuenta,
+      tipo: "Retiro",
+      concepto: "Retiro de dinero",
+      valor: monto,
+    });
+
+    document.getElementById("contenidoReciboRetiro").innerHTML = generarHTMLRecibo(tx, u);
+    document.getElementById("reciboRetiro").classList.remove("hidden");
+    document.getElementById("formRetiro").classList.add("hidden");
+
+    cargarDatosUsuario();
+    alerta.mostrar("¡Retiro realizado exitosamente!", "success");
+  });
+
+  // ══════════════════════════════════════════════════════════
+  //  PAGO DE SERVICIOS
+  // ══════════════════════════════════════════════════════════
+  document.getElementById("formServicios").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const servicio    = document.getElementById("tipoServicio").value;
+    const referencia  = document.getElementById("referenciaServicio").value;
+    const monto       = parseFloat(document.getElementById("montoServicio").value);
+    const alerta      = document.getElementById("alertaServicios");
+
+    // Limpiar errores
+    ["errTipoServicio","errReferenciaServicio","errMontoServicio"].forEach(id => {
+      document.getElementById(id).ocultar();
+    });
+
+    let esValido = true;
+
+    if (!servicio) {
+      document.getElementById("errTipoServicio").mostrar("Selecciona el servicio a pagar");
+      esValido = false;
+    }
+    if (esCampoVacio(referencia)) {
+      document.getElementById("errReferenciaServicio").mostrar("Ingresa la referencia del servicio");
+      esValido = false;
+    }
+    if (!monto || monto < 1000) {
+      document.getElementById("errMontoServicio").mostrar("El monto mínimo es $1.000");
+      esValido = false;
+    }
+
+    if (!esValido) return;
+
+    const u = obtenerSesionActiva();
+
+    if (monto > u.saldo) {
+      document.getElementById("errMontoServicio").mostrar(`Saldo insuficiente. Disponible: ${formatearMoneda(u.saldo)}`);
+      alerta.mostrar("No tienes saldo suficiente para este pago.", "error");
+      return;
+    }
+
+    const tx = registrarTransaccion({
+      numeroCuenta: u.numeroCuenta,
+      tipo: "Pago de servicio",
+      // Template literal para incluir el nombre del servicio en el concepto
+      concepto: `Pago de servicio público ${servicio}`,
+      valor: monto,
+    });
+
+    document.getElementById("contenidoReciboServicios").innerHTML = generarHTMLRecibo(tx, u);
+    document.getElementById("reciboServicios").classList.remove("hidden");
+    document.getElementById("formServicios").classList.add("hidden");
+
+    cargarDatosUsuario();
+    alerta.mostrar("¡Pago realizado exitosamente!", "success");
+  });
+
+  // ══════════════════════════════════════════════════════════
+  //  CERTIFICADO BANCARIO
+  // ══════════════════════════════════════════════════════════
+  function generarCertificado() {
+    const u = obtenerSesionActiva();
+    const fechaHoy = new Date().toLocaleDateString("es-CO", {
+      day: "numeric", month: "long", year: "numeric"
+    });
+
+    document.getElementById("certificadoBancario").innerHTML = `
+      <div class="certificado__membrete">
+        <div>
+          <div style="font-size:1.6rem; font-weight:900; color: var(--color-primario); font-family:'Playfair Display',serif;">
+            🏦 BANCO ACME S.A.
+          </div>
+          <div style="font-size:.8rem; color: var(--color-texto-suave);">NIT: 900.123.456-7 | Vigilado Superintendencia Financiera</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:.75rem; color: var(--color-texto-suave);">Fecha de expedición</div>
+          <div style="font-weight:700;">${fechaHoy}</div>
+        </div>
+      </div>
+
+      <div style="text-align:center; margin-bottom:2rem;">
+        <h2 style="letter-spacing:.1em; text-transform:uppercase;">Certificado de Cuenta Bancaria</h2>
+        <div style="width:60px; height:3px; background: var(--color-acento); margin: .5rem auto 0;"></div>
+      </div>
+
+      <div class="certificado__cuerpo">
+        <p>El <strong>BANCO ACME S.A.</strong>, entidad bancaria legalmente constituida y vigilada por la 
+        Superintendencia Financiera de Colombia, con domicilio principal en la ciudad de Bogotá D.C.,</p>
+
+        <p style="margin-top:1rem;"><strong>CERTIFICA QUE:</strong></p>
+
+        <p style="margin-top:1rem;">
+          El/La señor(a) <strong>${u.nombres} ${u.apellidos}</strong>, identificado(a) con 
+          <strong>${u.tipoId === 'CC' ? 'Cédula de Ciudadanía' : u.tipoId} No. ${u.numeroId}</strong>, 
+          es titular de una cuenta de ahorros en esta institución bancaria, con el número de cuenta
+          <strong>${u.numeroCuenta}</strong>, la cual se encuentra en estado <strong>ACTIVO</strong> 
+          desde el día <strong>${formatearFecha(u.fechaCreacion)}</strong>.
+        </p>
+
+        <p style="margin-top:1rem;">
+          El saldo actual de la cuenta a la fecha de expedición de este certificado es de 
+          <strong>${formatearMoneda(u.saldo)}</strong> (${numeroALetras(u.saldo)} pesos colombianos).
+        </p>
+
+        <p style="margin-top:1rem;">
+          Este certificado se expide a solicitud del interesado para los fines legales que considere pertinentes, 
+          a los <strong>${fechaHoy}</strong>.
+        </p>
+      </div>
+
+      <div style="margin-top:3rem; display:flex; justify-content:space-between; flex-wrap:wrap; gap:2rem;">
+        <div class="certificado__firma">
+          <div>___________________________</div>
+          <div><strong>Gerente General</strong></div>
+          <div style="color: var(--color-texto-suave);">Banco Acme S.A.</div>
+        </div>
+        <div class="certificado__firma">
+          <div>___________________________</div>
+          <div><strong>Jefe de Operaciones</strong></div>
+          <div style="color: var(--color-texto-suave);">Banco Acme S.A.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:2rem; padding:1rem; background: var(--color-fondo); border-radius: var(--radio-md); font-size:.75rem; color: var(--color-texto-suave); text-align:center;">
+        Este documento es válido únicamente con los sellos y firmas originales de la institución. 
+        Banco Acme S.A. no se hace responsable por el uso indebido de este certificado.
+      </div>
+    `;
+  }
+
+  // ══════════════════════════════════════════════════════════
+  //  FUNCIONES AUXILIARES DEL DASHBOARD
+  // ══════════════════════════════════════════════════════════
+
+  /** Genera el HTML del recibo de una transacción */
+  function generarHTMLRecibo(tx, usuarioAntes) {
+    const usuarioActual = obtenerSesionActiva(); // saldo ya actualizado
+    return `
+      <div class="recibo__titulo">
+        <strong>🏦 Banco Acme — Comprobante de Transacción</strong>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Fecha</span>
+        <span class="recibo__valor">${formatearFecha(tx.fecha)} ${tx.hora}</span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Referencia</span>
+        <span class="recibo__valor" style="font-family:monospace;">${tx.referencia}</span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Tipo</span>
+        <span class="recibo__valor">${tx.tipo}</span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Concepto</span>
+        <span class="recibo__valor">${tx.concepto}</span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Valor</span>
+        <span class="recibo__valor" style="font-size:1.15rem; color: var(--color-primario);">
+          ${formatearMoneda(tx.valor)}
+        </span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Saldo actual</span>
+        <span class="recibo__valor" style="color: var(--color-exito);">${formatearMoneda(usuarioActual.saldo)}</span>
+      </div>
+    `;
+  }
+
+  /**
+   * Convierte un número a su representación en letras (simplificado para COP).
+   * Se usa en el certificado bancario.
+   */
+  function numeroALetras(num) {
+    if (num === 0) return "cero";
+    const millones = Math.floor(num / 1000000);
+    const miles    = Math.floor((num % 1000000) / 1000);
+    const resto    = num % 1000;
+    let resultado  = "";
+    if (millones > 0) resultado += `${millones} millón${millones > 1 ? 'es' : ''} `;
+    if (miles    > 0) resultado += `${miles} mil `;
+    if (resto    > 0) resultado += `${resto} `;
+    return resultado.trim();
+  }
+
+  /**
+   * Reinicia una sección de operación para hacer una nueva.
+   * @param {string} seccion - 'consignacion' | 'retiro' | 'servicios' | 'transferencia'
+   */
+  function nuevaOperacion(seccion) {
+    const seccionCapitalizada = seccion.charAt(0).toUpperCase() + seccion.slice(1);
+    document.getElementById(`recibo${seccionCapitalizada}`).classList.add("hidden");
+    document.getElementById(`form${seccionCapitalizada}`).classList.remove("hidden");
+    document.getElementById(`form${seccionCapitalizada}`).reset();
+    
+    // Limpiar info destinatario si es transferencia
+    if (seccion === 'transferencia') {
+      document.getElementById("infoDestinatario").classList.add("hidden");
+    }
+    
+    cargarDatosUsuario();
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banco Acme — Recuperar Contraseña</title>
+  <link rel="stylesheet" href="../CSS/styles.css" />
+  <link rel="icon" href="/IMG/5531960.png" />
+</head>
+<body>
+
+<main class="pagina-auth">
+  <div class="auth-contenedor" style="max-width:500px;">
+
+    <!-- Solo panel derecho (formulario), sin panel decorativo en esta página -->
+    <div class="auth-panel-der" style="width:100%;">
+
+      <div style="text-align:center; margin-bottom:1.5rem;">
+        <div style="font-size:2.5rem;">🔑</div>
+        <h2>Recuperar contraseña</h2>
+        <p class="text-muted mt-sm">Ingresa tus datos para verificar tu identidad.</p>
+      </div>
+
+      <acme-alert id="alertaRecuperar"></acme-alert>
+
+      <!-- ═══ PASO 1: Verificar identidad ═══ -->
+      <div id="paso1">
+        <form id="formVerificar" novalidate>
+          <div class="form-grupo">
+            <label for="tipoId">Tipo de identificación</label>
+            <select id="tipoId" class="form-input" required>
+              <option value="">Selecciona...</option>
+              <option value="CC">Cédula de Ciudadanía (CC)</option>
+              <option value="CE">Cédula de Extranjería (CE)</option>
+              <option value="TI">Tarjeta de Identidad (TI)</option>
+              <option value="PA">Pasaporte (PA)</option>
+            </select>
+            <acme-campo-error id="errTipoId"></acme-campo-error>
+          </div>
+
+          <div class="form-grupo">
+            <label for="numeroId">Número de identificación</label>
+            <input type="text" id="numeroId" class="form-input" placeholder="Ej: 1234567890" maxlength="20" required />
+            <acme-campo-error id="errNumeroId"></acme-campo-error>
+          </div>
+
+          <div class="form-grupo">
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" class="form-input" placeholder="El registrado en tu cuenta" required />
+            <acme-campo-error id="errCorreo"></acme-campo-error>
+          </div>
+
+          <div style="display:flex; gap:1rem; margin-top:1.5rem; flex-wrap:wrap;">
+            <button type="submit" class="btn btn--primario btn--lg" style="flex:1;">
+              Verificar identidad
+            </button>
+            <button type="button" class="btn btn--outline btn--lg" style="flex:1;" onclick="redirigirA('index.html')">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ═══ PASO 2: Asignar nueva contraseña (oculto inicialmente) ═══ -->
+      <div id="paso2" class="hidden">
+        <div style="text-align:center; margin-bottom:1.5rem;">
+          <div style="font-size:2rem; margin-bottom:.5rem;">✅</div>
+          <p><strong>Identidad verificada.</strong> Ahora asigna tu nueva contraseña.</p>
+        </div>
+
+        <form id="formNuevaPassword" novalidate>
+          <div class="form-grupo">
+            <label for="nuevaPassword">Nueva contraseña (mín. 6 caracteres)</label>
+            <input type="password" id="nuevaPassword" class="form-input" placeholder="Tu nueva contraseña" required />
+            <acme-campo-error id="errNuevaPassword"></acme-campo-error>
+          </div>
+
+          <div class="form-grupo">
+            <label for="confirmarNuevaPassword">Confirmar nueva contraseña</label>
+            <input type="password" id="confirmarNuevaPassword" class="form-input" placeholder="Repite la contraseña" required />
+            <acme-campo-error id="errConfirmarNuevaPassword"></acme-campo-error>
+          </div>
+
+          <button type="submit" class="btn btn--primario btn--lg btn--full mt-md">
+            Guardar nueva contraseña
+          </button>
+        </form>
+      </div>
+
+      <div class="text-center mt-lg">
+        <a href="../index.html">← Volver al inicio de sesión</a>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="../JS/storage.js"></script>
+<script src="../JS/utils.js"></script>
+<script src="../JS/components.js"></script>
+
+<script>
+  // Variable que guardará el usuario encontrado (entre los dos pasos)
+  // La declaramos fuera de las funciones para que ambas la puedan usar
+  let usuarioEncontrado = null;
+
+  const alerta = document.getElementById("alertaRecuperar");
+
+  // ── PASO 1: Verificar identidad ───────────────────────────
+  document.getElementById("formVerificar").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const tipoId   = document.getElementById("tipoId").value;
+    const numeroId = document.getElementById("numeroId").value;
+    const correo   = document.getElementById("correo").value.toLowerCase().trim();
+
+    // Limpiar errores anteriores
+    ["errTipoId", "errNumeroId", "errCorreo"].forEach(id => {
+      document.getElementById(id).ocultar();
+    });
+
+    let esValido = true;
+
+    if (esCampoVacio(tipoId)) {
+      document.getElementById("errTipoId").mostrar("Selecciona el tipo de identificación");
+      esValido = false;
+    }
+    if (esCampoVacio(numeroId)) {
+      document.getElementById("errNumeroId").mostrar("Ingresa tu número de identificación");
+      esValido = false;
+    }
+    if (!esCorreoValido(correo)) {
+      document.getElementById("errCorreo").mostrar("Ingresa un correo electrónico válido");
+      esValido = false;
+    }
+
+    if (!esValido) return;
+
+    // Buscar usuario que coincida con los 3 datos
+    const usuario = buscarUsuarioPorId(tipoId, numeroId);
+
+    // Verificamos que exista Y que el correo coincida
+    if (!usuario || usuario.correo !== correo) {
+      alerta.mostrar("Los datos ingresados no coinciden con ninguna cuenta registrada.", "error");
+      return;
+    }
+
+    // ¡Verificado! Guardar referencia y pasar al paso 2
+    usuarioEncontrado = usuario;
+
+    // Ocultar paso 1, mostrar paso 2
+    // classList.add/remove → agrega o quita clases CSS
+    document.getElementById("paso1").classList.add("hidden");
+    document.getElementById("paso2").classList.remove("hidden");
+    alerta.mostrar("Identidad verificada correctamente.", "success");
+  });
+
+  // ── PASO 2: Asignar nueva contraseña ─────────────────────
+  document.getElementById("formNuevaPassword").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const nuevaPassword     = document.getElementById("nuevaPassword").value;
+    const confirmarPassword = document.getElementById("confirmarNuevaPassword").value;
+
+    document.getElementById("errNuevaPassword").ocultar();
+    document.getElementById("errConfirmarNuevaPassword").ocultar();
+
+    let esValido = true;
+
+    if (!esPasswordValida(nuevaPassword)) {
+      document.getElementById("errNuevaPassword").mostrar("La contraseña debe tener al menos 6 caracteres");
+      esValido = false;
+    }
+
+    if (nuevaPassword !== confirmarPassword) {
+      document.getElementById("errConfirmarNuevaPassword").mostrar("Las contraseñas no coinciden");
+      esValido = false;
+    }
+
+    if (!esValido) return;
+
+    // Actualizar la contraseña en localStorage
+    // Pasamos el id del usuario y el objeto con los cambios
+    actualizarUsuario(usuarioEncontrado.numeroId, { password: nuevaPassword });
+
+    alerta.mostrar("¡Contraseña actualizada exitosamente! Redirigiendo...", "success");
+
+    // Redirigir al login después de 2 segundos
+    setTimeout(() => redirigirA("index.html"), 2000);
+  });
+
+  // Validación en tiempo real: confirmar contraseña
+  document.getElementById("confirmarNuevaPassword").addEventListener("input", function () {
+    const nueva = document.getElementById("nuevaPassword").value;
+    if (this.value && this.value !== nueva) {
+      document.getElementById("errConfirmarNuevaPassword").mostrar("Las contraseñas no coinciden");
+    } else {
+      document.getElementById("errConfirmarNuevaPassword").ocultar();
+    }
+  });
+</script>
+
+</body>
+</html>

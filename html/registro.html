@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banco Acme — Crear Cuenta</title>
+  <link rel="stylesheet" href="../CSS/styles.css" />
+  <link rel="icon" href="/IMG/5531960.png" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     FORMULARIO DE REGISTRO
+  ═══════════════════════════════════════════════════════════ -->
+<div class="pagina-registro">
+  <div class="registro-contenedor">
+
+    <!-- Cabecera -->
+    <div class="registro-header">
+      <div class="auth-logo" style="font-size:2.5rem; margin-bottom:.5rem;">🏦</div>
+      <div class="logo-texto">Banco Acme</div>
+      <h1 style="margin-top:.5rem;">Crear cuenta bancaria</h1>
+      <p class="text-muted">Completa el formulario. Todos los campos son obligatorios.</p>
+    </div>
+
+    <!-- Sección: formulario de registro (se oculta al completar) -->
+    <div id="seccionFormulario">
+      <div class="card">
+        <acme-alert id="alertaRegistro"></acme-alert>
+
+        <form id="formRegistro" novalidate>
+
+          <!-- ── Identificación ── -->
+          <h3 style="margin-bottom:1rem; border-bottom: 2px solid var(--color-fondo); padding-bottom:.5rem;">
+            📋 Identificación
+          </h3>
+          <div class="form-grid">
+            <div class="form-grupo">
+              <label for="tipoId">Tipo de identificación</label>
+              <select id="tipoId" class="form-input" required>
+                <option value="">Selecciona...</option>
+                <option value="CC">Cédula de Ciudadanía (CC)</option>
+                <option value="CE">Cédula de Extranjería (CE)</option>
+                <option value="TI">Tarjeta de Identidad (TI)</option>
+                <option value="PA">Pasaporte (PA)</option>
+              </select>
+              <acme-campo-error id="errTipoId"></acme-campo-error>
+            </div>
+            <div class="form-grupo">
+              <label for="numeroId">Número de identificación</label>
+              <input type="text" id="numeroId" class="form-input" placeholder="Ej: 1234567890" maxlength="20" required />
+              <acme-campo-error id="errNumeroId"></acme-campo-error>
+            </div>
+          </div>
+
+          <!-- ── Datos personales ── -->
+          <h3 style="margin: 1.5rem 0 1rem; border-bottom: 2px solid var(--color-fondo); padding-bottom:.5rem;">
+            👤 Datos personales
+          </h3>
+          <div class="form-grid">
+            <div class="form-grupo">
+              <label for="nombres">Nombres</label>
+              <input type="text" id="nombres" class="form-input" placeholder="Ej: Juan Carlos" required />
+              <acme-campo-error id="errNombres"></acme-campo-error>
+            </div>
+            <div class="form-grupo">
+              <label for="apellidos">Apellidos</label>
+              <input type="text" id="apellidos" class="form-input" placeholder="Ej: Pérez García" required />
+              <acme-campo-error id="errApellidos"></acme-campo-error>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-grupo">
+              <label for="genero">Género</label>
+              <select id="genero" class="form-input" required>
+                <option value="">Selecciona...</option>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+                <option value="O">Otro / Prefiero no decir</option>
+              </select>
+              <acme-campo-error id="errGenero"></acme-campo-error>
+            </div>
+            <div class="form-grupo">
+              <label for="telefono">Teléfono (10 dígitos)</label>
+              <input type="tel" id="telefono" class="form-input" placeholder="Ej: 3001234567" maxlength="10" required />
+              <acme-campo-error id="errTelefono"></acme-campo-error>
+            </div>
+          </div>
+
+          <div class="form-grupo">
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" class="form-input" placeholder="Ej: juan@correo.com" required />
+            <acme-campo-error id="errCorreo"></acme-campo-error>
+          </div>
+
+          <!-- ── Residencia ── -->
+          <h3 style="margin: 1.5rem 0 1rem; border-bottom: 2px solid var(--color-fondo); padding-bottom:.5rem;">
+            🏠 Residencia
+          </h3>
+          <div class="form-grupo">
+            <label for="direccion">Dirección</label>
+            <input type="text" id="direccion" class="form-input" placeholder="Ej: Calle 1 # 2-3, Barrio Centro" required />
+            <acme-campo-error id="errDireccion"></acme-campo-error>
+          </div>
+          <div class="form-grupo">
+            <label for="ciudad">Ciudad</label>
+            <input type="text" id="ciudad" class="form-input" placeholder="Ej: Bogotá" required />
+            <acme-campo-error id="errCiudad"></acme-campo-error>
+          </div>
+
+          <!-- ── Seguridad ── -->
+          <h3 style="margin: 1.5rem 0 1rem; border-bottom: 2px solid var(--color-fondo); padding-bottom:.5rem;">
+            🔒 Seguridad
+          </h3>
+          <div class="form-grid">
+            <div class="form-grupo">
+              <label for="password">Contraseña (mín. 6 caracteres)</label>
+              <input type="password" id="password" class="form-input" placeholder="Tu contraseña" required />
+              <acme-campo-error id="errPassword"></acme-campo-error>
+            </div>
+            <div class="form-grupo">
+              <label for="confirmarPassword">Confirmar contraseña</label>
+              <input type="password" id="confirmarPassword" class="form-input" placeholder="Repite la contraseña" required />
+              <acme-campo-error id="errConfirmarPassword"></acme-campo-error>
+            </div>
+          </div>
+
+          <!-- Botones -->
+          <div style="display:flex; gap:1rem; margin-top:1.5rem; flex-wrap:wrap;">
+            <button type="submit" class="btn btn--primario btn--lg" style="flex:1;">
+              ✅ Crear cuenta
+            </button>
+            <a type="button" class="btn btn--outline btn--lg" href="../index.html" style="flex:1;">
+              ✕ Cancelar
+            </a>
+          </div>
+
+        </form>
+      </div><!-- .card -->
+    </div><!-- #seccionFormulario -->
+
+    <!-- ═══ Sección de RESUMEN — aparece tras registro exitoso ═══ -->
+    <!-- Está oculta con la clase "hidden", JS la muestra cuando el registro es exitoso -->
+    <div id="seccionResumen" class="hidden">
+      <div class="card" style="text-align:center; max-width:480px; margin: 0 auto;">
+        <div style="font-size:4rem; margin-bottom:1rem;">🎉</div>
+        <h2>¡Cuenta creada exitosamente!</h2>
+        <p class="text-muted mt-sm">Guarda tu número de cuenta, lo necesitarás para todas tus operaciones.</p>
+
+        <div id="resumenCuenta" class="recibo mt-lg" style="text-align:left;"></div>
+
+        <a href="../index.html" class="btn btn--primario btn--lg btn--full mt-lg">
+          Ir al inicio de sesión
+        </a>
+      </div>
+    </div>
+
+  </div><!-- .registro-contenedor -->
+</div><!-- .pagina-registro -->
+
+<script src="../JS/storage.js"></script>
+<script src="../JS/utils.js"></script>
+<script src="../JS/components.js"></script>
+
+<script>
+  // ── Referencias al DOM ────────────────────────────────────
+  const form    = document.getElementById("formRegistro");
+  const alerta  = document.getElementById("alertaRegistro");
+
+  // Campos de entrada
+  const campos = {
+    tipoId:            document.getElementById("tipoId"),
+    numeroId:          document.getElementById("numeroId"),
+    nombres:           document.getElementById("nombres"),
+    apellidos:         document.getElementById("apellidos"),
+    genero:            document.getElementById("genero"),
+    telefono:          document.getElementById("telefono"),
+    correo:            document.getElementById("correo"),
+    direccion:         document.getElementById("direccion"),
+    ciudad:            document.getElementById("ciudad"),
+    password:          document.getElementById("password"),
+    confirmarPassword: document.getElementById("confirmarPassword"),
+  };
+
+  // Componentes de error
+  const errores = {
+    tipoId:            document.getElementById("errTipoId"),
+    numeroId:          document.getElementById("errNumeroId"),
+    nombres:           document.getElementById("errNombres"),
+    apellidos:         document.getElementById("errApellidos"),
+    genero:            document.getElementById("errGenero"),
+    telefono:          document.getElementById("errTelefono"),
+    correo:            document.getElementById("errCorreo"),
+    direccion:         document.getElementById("errDireccion"),
+    ciudad:            document.getElementById("errCiudad"),
+    password:          document.getElementById("errPassword"),
+    confirmarPassword: document.getElementById("errConfirmarPassword"),
+  };
+
+  // ── Limpiar todos los errores ─────────────────────────────
+  function limpiarErrores() {
+    // Object.values() → devuelve un array con todos los valores del objeto
+    Object.values(errores).forEach(err => err.ocultar());
+    Object.values(campos).forEach(campo => campo.classList.remove("form-input--error", "form-input--exito"));
+  }
+
+  // Marca un campo como error
+  function marcarError(nombreCampo, mensaje) {
+    errores[nombreCampo].mostrar(mensaje);
+    campos[nombreCampo].classList.add("form-input--error");
+    campos[nombreCampo].classList.remove("form-input--exito");
+    return false;  // para poder hacer: return marcarError(...)
+  }
+
+  // ── Validación completa ───────────────────────────────────
+  function validarTodo() {
+    limpiarErrores();
+    let esValido = true;
+
+    // Validar campos simples (no pueden estar vacíos)
+    const camposRequeridos = ["tipoId","nombres","apellidos","genero","direccion","ciudad"];
+    camposRequeridos.forEach(nombre => {
+      if (esCampoVacio(campos[nombre].value)) {
+        marcarError(nombre, "Este campo es obligatorio");
+        esValido = false;
+      }
+    });
+
+    // Número de ID: solo números, no vacío
+    if (esCampoVacio(campos.numeroId.value)) {
+      marcarError("numeroId", "Ingresa tu número de identificación");
+      esValido = false;
+    } else if (!esSoloNumeros(campos.numeroId.value)) {
+      marcarError("numeroId", "Solo se permiten números");
+      esValido = false;
+    }
+
+    // Teléfono: exactamente 10 dígitos
+    if (!esTelefonoValido(campos.telefono.value)) {
+      marcarError("telefono", "El teléfono debe tener exactamente 10 dígitos");
+      esValido = false;
+    }
+
+    // Correo: formato válido
+    if (!esCorreoValido(campos.correo.value)) {
+      marcarError("correo", "Ingresa un correo electrónico válido");
+      esValido = false;
+    }
+
+    // Contraseña: mínimo 6 caracteres
+    if (!esPasswordValida(campos.password.value)) {
+      marcarError("password", "La contraseña debe tener al menos 6 caracteres");
+      esValido = false;
+    }
+
+    // Confirmar contraseña: deben coincidir
+    if (campos.confirmarPassword.value !== campos.password.value) {
+      marcarError("confirmarPassword", "Las contraseñas no coinciden");
+      esValido = false;
+    }
+
+    // ¿Ya existe el usuario? (mismo tipo + número)
+    if (campos.tipoId.value && campos.numeroId.value) {
+      const existente = buscarUsuarioPorId(campos.tipoId.value, campos.numeroId.value);
+      if (existente) {
+        marcarError("numeroId", "Ya existe una cuenta con este número de identificación");
+        esValido = false;
+      }
+    }
+
+    return esValido;
+  }
+
+  // ── Envío del formulario ──────────────────────────────────
+  form.addEventListener("submit", function (evento) {
+    evento.preventDefault();
+
+    if (!validarTodo()) {
+      alerta.mostrar("Por favor corrige los errores antes de continuar.", "error");
+      // Hacer scroll hacia arriba para ver los errores
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    // Registrar usuario en localStorage
+    const nuevoUsuario = registrarUsuario({
+      tipoId:    campos.tipoId.value,
+      numeroId:  campos.numeroId.value,
+      nombres:   capitalizarNombre(campos.nombres.value),
+      apellidos: capitalizarNombre(campos.apellidos.value),
+      genero:    campos.genero.value,
+      telefono:  campos.telefono.value,
+      correo:    campos.correo.value.toLowerCase(),
+      direccion: campos.direccion.value,
+      ciudad:    capitalizarNombre(campos.ciudad.value),
+      password:  campos.password.value,
+    });
+
+    // Mostrar resumen de la cuenta creada
+    mostrarResumen(nuevoUsuario);
+  });
+
+  // ── Mostrar resumen tras registro ─────────────────────────
+  function mostrarResumen(usuario) {
+    // Ocultar el formulario y mostrar el resumen
+    document.getElementById("seccionFormulario").classList.add("hidden");
+    document.getElementById("seccionResumen").classList.remove("hidden");
+
+    // Llenar el recibo con los datos
+    document.getElementById("resumenCuenta").innerHTML = `
+      <div class="recibo__titulo">
+        <strong>🏦 Banco Acme — Confirmación de Cuenta</strong>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Titular</span>
+        <span class="recibo__valor">${usuario.nombres} ${usuario.apellidos}</span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Número de cuenta</span>
+        <span class="recibo__valor" style="color: var(--color-primario-claro); font-size:1.1rem;">
+          ${usuario.numeroCuenta}
+        </span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Identificación</span>
+        <span class="recibo__valor">${usuario.tipoId} ${usuario.numeroId}</span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Saldo inicial</span>
+        <span class="recibo__valor">${formatearMoneda(usuario.saldo)}</span>
+      </div>
+      <div class="recibo__fila">
+        <span class="recibo__label">Fecha de creación</span>
+        <span class="recibo__valor">${formatearFecha(usuario.fechaCreacion)}</span>
+      </div>
+    `;
+
+    // Scroll al inicio para ver el resumen
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // ── Validación en tiempo real ─────────────────────────────
+  // Para el correo: valida al salir del campo (evento blur)
+  campos.correo.addEventListener("blur", function () {
+    if (this.value && !esCorreoValido(this.value)) {
+      marcarError("correo", "Formato de correo inválido");
+    } else if (this.value) {
+      errores.correo.ocultar();
+      this.classList.remove("form-input--error");
+      this.classList.add("form-input--exito");
+    }
+  });
+
+  // Para el teléfono: solo permite ingresar números
+  campos.telefono.addEventListener("input", function () {
+    // Reemplaza cualquier caracter que NO sea dígito con vacío
+    this.value = this.value.replace(/\D/g, "");
+  });
+
+  // Confirmar contraseña: valida en tiempo real mientras escribe
+  campos.confirmarPassword.addEventListener("input", function () {
+    if (this.value && this.value !== campos.password.value) {
+      marcarError("confirmarPassword", "Las contraseñas no coinciden");
+    } else if (this.value) {
+      errores.confirmarPassword.ocultar();
+      this.classList.remove("form-input--error");
+      this.classList.add("form-input--exito");
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banco Acme — Iniciar Sesión</title>
+  <link rel="stylesheet" href="CSS/styles.css" />
+  <link rel="icon" href="/IMG/5531960.png" />
+  <style>
+    .login-circulo__punto {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--color-cyan);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .login-circulo__ring {
+      position: absolute;
+      inset: 0;
+      animation: rotar 12s linear infinite;
+    }
+    .login-circulo__ring--outer {
+      animation-duration: 20s;
+      animation-direction: reverse;
+    }
+    @keyframes rotar {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+<main class="pagina-auth">
+  <div class="login-circulo">
+
+    <div class="login-circulo__ring" id="ringInterior"></div>
+    <div class="login-circulo__ring login-circulo__ring--outer" id="ringExterior"></div>
+
+    <div class="login-box">
+      <h2>Login</h2>
+
+      <acme-alert id="alertaLogin"></acme-alert>
+
+      <form id="formLogin" novalidate>
+
+        <div class="login-input-wrap">
+          <label for="tipoId">Tipo de identificación</label>
+          <select id="tipoId" class="form-input" required>
+            <option value="">Selecciona...</option>
+            <option value="CC">Cédula de Ciudadanía (CC)</option>
+            <option value="CE">Cédula de Extranjería (CE)</option>
+            <option value="TI">Tarjeta de Identidad (TI)</option>
+            <option value="PA">Pasaporte (PA)</option>
+          </select>
+          <acme-campo-error id="errorTipoId"></acme-campo-error>
+        </div>
+
+        <div class="login-input-wrap">
+          <label for="numeroId">Número de identificación</label>
+          <input type="text" id="numeroId" class="form-input"
+            placeholder="Ej: 1234567890" maxlength="20" required />
+          <acme-campo-error id="errorNumeroId"></acme-campo-error>
+        </div>
+
+        <div class="login-input-wrap">
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" class="form-input"
+            placeholder="••••••••" required />
+          <acme-campo-error id="errorPassword"></acme-campo-error>
+        </div>
+
+        <button type="submit" class="login-btn">Ingresar</button>
+      </form>
+
+      <div class="login-links">
+        <a href="html/recuperar.html">¿Olvidaste tu contraseña?</a>
+        <a href="html/registro.html">Crear cuenta</a>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="JS/storage.js"></script>
+<script src="JS/utils.js"></script>
+<script src="JS/components.js"></script>
+
+<script>
+  // ── Generar puntos del círculo ────────────────────────────
+  // Usamos trigonometría: x = r*cos(a), y = r*sin(a)
+  function generarPuntos(id, cantidad, radio) {
+    const container = document.getElementById(id);
+    const cx = 220, cy = 220; // centro del div de 440x440
+    for (let i = 0; i < cantidad; i++) {
+      const angulo = (i / cantidad) * 2 * Math.PI;
+      const x = cx + radio * Math.cos(angulo);
+      const y = cy + radio * Math.sin(angulo);
+      const grande = i % 4 === 0;
+      const punto = document.createElement("div");
+      punto.className = "login-circulo__punto";
+      punto.style.cssText = `
+        left:${x}px; top:${y}px;
+        width:${grande ? 7 : 4}px; height:${grande ? 7 : 4}px;
+        opacity:${grande ? 0.9 : 0.45};
+        box-shadow:0 0 ${grande ? 8 : 4}px var(--color-cyan);
+      `;
+      container.appendChild(punto);
+    }
+  }
+  generarPuntos("ringInterior", 42, 180);
+  generarPuntos("ringExterior", 58, 212);
+
+  // ── Lógica del Login ──────────────────────────────────────
+  if (obtenerSesionActiva()) redirigirA("dashboard.html");
+
+  const form        = document.getElementById("formLogin");
+  const inpTipoId   = document.getElementById("tipoId");
+  const inpNumeroId = document.getElementById("numeroId");
+  const inpPassword = document.getElementById("password");
+  const alerta      = document.getElementById("alertaLogin");
+  const errTipo     = document.getElementById("errorTipoId");
+  const errNumero   = document.getElementById("errorNumeroId");
+  const errPassword = document.getElementById("errorPassword");
+
+  function validarFormulario() {
+    let esValido = true;
+    [errTipo, errNumero, errPassword].forEach(e => e.ocultar());
+    [inpTipoId, inpNumeroId, inpPassword].forEach(i => i.classList.remove("form-input--error"));
+
+    if (esCampoVacio(inpTipoId.value)) {
+      errTipo.mostrar("Selecciona el tipo de identificación");
+      inpTipoId.classList.add("form-input--error");
+      esValido = false;
+    }
+    if (esCampoVacio(inpNumeroId.value)) {
+      errNumero.mostrar("Ingresa tu número de identificación");
+      inpNumeroId.classList.add("form-input--error");
+      esValido = false;
+    } else if (!esSoloNumeros(inpNumeroId.value)) {
+      errNumero.mostrar("Solo se permiten números");
+      inpNumeroId.classList.add("form-input--error");
+      esValido = false;
+    }
+    if (esCampoVacio(inpPassword.value)) {
+      errPassword.mostrar("Ingresa tu contraseña");
+      inpPassword.classList.add("form-input--error");
+      esValido = false;
+    }
+    return esValido;
+  }
+
+  form.addEventListener("submit", function (evento) {
+    evento.preventDefault();
+    if (!validarFormulario()) return;
+    const usuario = buscarUsuarioPorId(inpTipoId.value, inpNumeroId.value);
+    if (!usuario || usuario.password !== inpPassword.value) {
+      alerta.mostrar("No se pudo validar tu identidad. Verifica tus datos.", "error");
+      return;
+    }
+    iniciarSesion(usuario);
+    alerta.mostrar("¡Ingreso exitoso! Redirigiendo...", "success");
+    setTimeout(() => redirigirA("dashboard.html"), 1000);
+  });
+
+  inpNumeroId.addEventListener("blur", function () {
+    if (!esCampoVacio(this.value) && !esSoloNumeros(this.value)) {
+      errNumero.mostrar("Solo se permiten números");
+      this.classList.add("form-input--error");
+    } else {
+      errNumero.ocultar();
+      this.classList.remove("form-input--error");
+    }
+  });
+</script>
+
+</body>
+</html>
